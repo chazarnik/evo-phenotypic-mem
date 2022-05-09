@@ -2,21 +2,18 @@ import numpy as np
 import random
 import sys,os, time
 
-# windows
 save_location = os.path.join(os.getcwd(), "git_projects\evo-phenotypic-mem\plot_source")
 time_stamp = time.strftime("%Y%m%d-%H%M%S")
 
-class GPSingleEnvMappingGRN():
+class GPMappingGRN():
 
-    def __init__(self, indiv_size, dev_steps, evo_steps, s_target, pop_size=100):
+    def __init__(self, indiv_size, dev_steps, evo_steps):
         self.vec_size = indiv_size
         self.geno_vec = np.zeros(indiv_size)
         self.interaction_matrix = np.zeros((indiv_size, indiv_size))
         # self.pheno_vec = np.zeros(indiv_size)
         self.t_dev = dev_steps
         self.t_evo = evo_steps
-        self.target_vec = s_target
-        self.population_size = pop_size
 
     def mutate_G(self):
         """Mutation of the genotype vector. We sample randomly an index of 
@@ -51,10 +48,11 @@ class GPSingleEnvMappingGRN():
 
         return mut_inter_matrix
 
-    def calculate_fitness(self, pheno_vec):
-        fitness = 1 + np.dot(pheno_vec, self.target_vec)
+    def calculate_fitness(self, pheno_vec, target_vec):
+        fitness = 1 + np.dot(pheno_vec, target_vec)
 
         return fitness
+    
 
     def update_phenotype(self, t1_rate=1, t2_rate=0.2):
         self.pheno_vec = self.pheno_vec + t1_rate*np.tanh(np.dot(self.interaction_matrix, self.pheno_vec) -
@@ -70,10 +68,10 @@ class GPSingleEnvMappingGRN():
 
 n = 8
 t_dev = 10
-t_evo = 200000
+t_evo = 20
 
 demotarget = np.array([1, 1,-1,-1,-1, 1,-1, 1])
-demoGRN = GPSingleEnvMappingGRN(n, t_dev, 1, demotarget)
+demoGRN = GPMappingGRN(n, t_dev, 1)
 
 # placeholder for interaction matrix plot shape NxNxT_evo
 plot_placeholder = np.zeros((t_evo,n,n))
@@ -82,7 +80,7 @@ plot_placeholder = np.zeros((t_evo,n,n))
 for j in range(t_evo):
     # run one evo loop on the genotype
     p_star = demoGRN.update_phenotype2(demoGRN.geno_vec, demoGRN.interaction_matrix)
-    p_star_fitness = demoGRN.calculate_fitness(p_star)
+    p_star_fitness = demoGRN.calculate_fitness(p_star, demotarget)
     # print(f"Step {i}")
     if j%10==0:
         print(f"Fitness at at evo {j} - ",p_star_fitness)
@@ -96,7 +94,7 @@ for j in range(t_evo):
     
     # run evo loop on mutant genotype
     p_star_mutant = demoGRN.update_phenotype2(mut_geno_vec, mut_B_matrix)
-    p_star_mutant_ft = demoGRN.calculate_fitness(p_star_mutant)
+    p_star_mutant_ft = demoGRN.calculate_fitness(p_star_mutant, demotarget)
     if j%10==0:
         print(f"Mutant phenotype vector at evo {j}", p_star_mutant)
     if p_star_mutant_ft>p_star_fitness:
@@ -105,6 +103,7 @@ for j in range(t_evo):
     
     # save interaction matrix instance
     plot_placeholder[j,:,:] = demoGRN.interaction_matrix
-print(demoGRN.interaction_matrix)
+
 # save interaction matrices to system 
-np.save(os.path.join(save_location, f"single_env_{n}_{t_evo}_{time_stamp}"),plot_placeholder)
+#np.save(os.path.join(save_location, f"single_env_{n}_{t_evo}_{time_stamp}"),plot_placeholder)
+#np.save(os.path.join(save_location, f"final_B_{n}_{t_evo}_{time_stamp}"),demoGRN.interaction_matrix)
