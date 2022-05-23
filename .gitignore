@@ -8,3 +8,5 @@ single_env_8_30000_20220508-125943.npy
 single_env_8_200000_20220508-120832.npy
 single_env_8_200000_20220508-130930.npy
 single_env_8_200000_20220508-133614.npy
+hopfield_repo
+__pycache__
