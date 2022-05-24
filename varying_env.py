@@ -2,7 +2,7 @@ import numpy as np
 import random
 import sys,os, time
 from single_env import GPMappingGRN
-#from generate_plots import plot_B_matrix_instance, plot_interaction_coefficients
+from generate_plots import plot_B_matrix_instance, plot_interaction_coefficients
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
